@@ -1,170 +1,466 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="kk">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Math Differentiator</title>
-    <!-- Tailwind CSS (Дизайн әдемі болуы үшін) -->
-    <script src="https://jsdelivr.net"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AI Math Differentiated Learning</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+    color: #1a202c;
+  }
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    overflow: hidden;
+  }
+  header {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: #fff;
+    padding: 32px 28px;
+    text-align: center;
+  }
+  header h1 { font-size: 1.8rem; margin-bottom: 8px; }
+  header p { opacity: 0.9; font-size: 0.95rem; }
+
+  .content { padding: 28px; }
+
+  .section-label {
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #374151;
+    font-size: 0.95rem;
+  }
+
+  .topic-select {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
+  }
+  .topic-btn {
+    flex: 1;
+    min-width: 140px;
+    padding: 12px 16px;
+    border: 2px solid #e5e7eb;
+    background: #f9fafb;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+  }
+  .topic-btn:hover { border-color: #7c3aed; }
+  .topic-btn.active {
+    background: #7c3aed;
+    color: #fff;
+    border-color: #7c3aed;
+  }
+
+  .level-tabs {
+    display: flex;
+    gap: 8px;
+    background: #f3f4f6;
+    padding: 6px;
+    border-radius: 14px;
+    margin-bottom: 22px;
+  }
+  .level-tab {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    background: transparent;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #6b7280;
+    transition: all 0.2s;
+  }
+  .level-tab.active {
+    background: #fff;
+    color: #4f46e5;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  .task-card {
+    background: #f9fafb;
+    border-left: 4px solid #7c3aed;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    line-height: 1.7;
+    min-height: 100px;
+    white-space: pre-wrap;
+    font-size: 0.95rem;
+  }
+
+  .task-card .loading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #6b7280;
+    font-style: italic;
+  }
+  .spinner {
+    width: 18px; height: 18px;
+    border: 3px solid #e5e7eb;
+    border-top-color: #7c3aed;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+  .btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-primary {
+    background: #4f46e5;
+    color: #fff;
+  }
+  .btn-primary:hover { background: #4338ca; transform: translateY(-1px); }
+  .btn-secondary {
+    background: #fff;
+    color: #4f46e5;
+    border: 2px solid #4f46e5;
+  }
+  .btn-secondary:hover { background: #eef2ff; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .hint-box {
+    background: #fef3c7;
+    border-left: 4px solid #f59e0b;
+    padding: 18px;
+    border-radius: 12px;
+    margin-top: 16px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    font-size: 0.93rem;
+    display: none;
+  }
+  .hint-box.show { display: block; }
+  .hint-box h4 { color: #92400e; margin-bottom: 8px; }
+
+  .api-section {
+    background: #f3f4f6;
+    padding: 18px;
+    border-radius: 12px;
+    margin-bottom: 22px;
+    font-size: 0.85rem;
+  }
+  .api-section label { font-weight: 600; color: #374151; display: block; margin-bottom: 6px; }
+  .api-section input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: monospace;
+  }
+  .api-section small { color: #6b7280; display: block; margin-top: 6px; }
+
+  footer {
+    text-align: center;
+    padding: 18px;
+    color: #9ca3af;
+    font-size: 0.8rem;
+    border-top: 1px solid #f3f4f6;
+  }
+
+  @media (max-width: 600px) {
+    header h1 { font-size: 1.4rem; }
+    .content { padding: 18px; }
+    .level-tab { font-size: 0.8rem; padding: 10px 6px; }
+  }
+</style>
 </head>
-<body class="bg-gray-100 min-h-screen p-6">
-    <div class="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-md">
-        <h1 class="text-3xl font-bold text-center text-indigo-600 mb-2">🧮 AI Math Differentiator</h1>
-        <p class="text-center text-gray-600 mb-6">Topic: AI for Differentiated Learning</p>
+<body>
+<div class="container">
+  <header>
+    <h1>🧮 AI Math Differentiated Learning</h1>
+    <p>Бір тапсырма — үш деңгей: Foundation • Standard • Advanced</p>
+  </header>
 
-        <!-- API Key және Есеп енгізу -->
-        <div class="mb-6 p-4 bg-indigo-50 rounded-lg">
-            <label class="block font-semibold mb-1">OpenAI API Key:</label>
-            <input type="password" id="apiKey" class="w-full p-2 border rounded mb-3 bg-white" placeholder="sk-...">
-            
-            <label class="block font-semibold mb-1">Core Math Problem / Equation:</label>
-            <input type="text" id="mathProblem" class="w-full p-2 border rounded bg-white" value="x^2 - 5x + 6 = 0">
-        </div>
-
-        <!-- Деңгейлерді таңдау -->
-        <div class="mb-6">
-            <label class="block font-semibold mb-2">Select Learner Proficiency Level:</label>
-            <div class="space-y-2">
-                <label class="flex items-center space-x-2 p-2 border rounded cursor-pointer hover:bg-gray-50">
-                    <input type="radio" name="level" value="Level 1: Foundation (Simplified context, step-by-step breakdown, direct hints)" checked>
-                    <span>Level 1: Foundation</span>
-                </label>
-               <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Math Differentiator — Future Edition</title>
-    <!-- Tailwind CSS -->
-    <script src="https://jsdelivr.net"></script>
-    <!-- Әдемі әрі ерекше қаріптер (Шрифттер) -->
-    <link rel="preconnect" href="https://googleapis.com">
-    <link rel="preconnect" href="https://gstatic.com" crossorigin>
-    <link href="https://googleapis.com/css2?family=Orbitron:wght@500;800;900&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        .font-cyber { font-family: 'Orbitron', sans-serif; }
-        .font-main { font-family: 'Plus Jakarta Sans', sans-serif; }
-    </style>
-</head>
-<body class="bg-slate-950 font-main min-h-screen flex items-center justify-center p-4 md:p-8 relative overflow-x-hidden">
-
-    <!-- Фондағы заманауи жарқыраған түсті шарлар (Неон эффектісі) -->
-    <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[120px] pointer-events-none"></div>
-    <div class="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-cyan-600/20 rounded-full blur-[120px] pointer-events-none"></div>
-
-    <!-- Басты футуристік панель -->
-    <div class="max-w-3xl w-full bg-slate-900/40 backdrop-blur-xl p-6 md:p-10 rounded-3xl shadow-[0_0_50px_rgba(168,85,247,0.15)] border border-purple-500/20 relative z-10">
-        
-        <!-- Ерекше Математикалық Эмблема және Тақырып -->
-        <div class="text-center mb-10 relative">
-            <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-fuchsia-500 via-purple-600 to-cyan-500 p-[2px] shadow-[0_0_30px_rgba(192,38,211,0.4)] mb-4 animate-bounce duration-[3s]">
-                <div class="w-full h-full bg-slate-950 rounded-[14px] flex flex-col items-center justify-center font-cyber font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-cyan-400">
-                    <span class="text-2xl leading-none">∑</span>
-                    <span class="text-xs text-purple-400 leading-none mt-0.5">f(x)</span>
-                </div>
-            </div>
-            
-            <h1 class="font-cyber text-2xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-400 to-cyan-400 uppercase tracking-wider mb-2">
-                AI Math Differentiator
-            </h1>
-            <div class="inline-block px-3 py-1 bg-purple-950/50 border border-purple-500/30 rounded-full">
-                <p class="text-cyan-400 text-xs font-semibold uppercase tracking-widest font-cyber">Topic 8: Adaptive Learning Engine</p>
-            </div>
-        </div>
-
-        <!-- Енгізу блоктары (Необычный дизайн) -->
-        <div class="space-y-4 mb-8">
-            <div class="p-6 bg-slate-950/80 rounded-2xl border border-slate-800 focus-within:border-cyan-500/50 transition duration-300">
-                <label class="block font-cyber font-bold text-pink-400 text-xs tracking-widest uppercase mb-2">🔑 Secure OpenAI API Key</label>
-                <input type="password" id="apiKey" class="w-full p-3 bg-slate-900/60 border border-slate-700/60 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition mb-5 font-mono" placeholder="sk-proj-........................">
-                
-                <label class="block font-cyber font-bold text-cyan-400 text-xs tracking-widest uppercase mb-2">📐 Core Math Problem / Formula</label>
-                <input type="text" id="mathProblem" class="w-full p-3 bg-slate-900/60 border border-slate-700/60 rounded-xl text-cyan-300 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition font-mono text-lg shadow-inner" value="x^2 - 5x + 6 = 0">
-            </div>
-        </div>
-
-        <!-- Деңгейлерді таңдау (Геймификация стилінде) -->
-        <div class="mb-8">
-            <label class="block font-cyber font-bold text-slate-400 text-xs tracking-widest uppercase mb-4">🎚️ Select Target Proficiency Level</label>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                
-                <!-- Level 1 -->
-                <label class="relative flex flex-col p-4 bg-slate-950/60 border border-slate-800 rounded-2xl cursor-pointer hover:border-pink-500/50 hover:shadow-[0_0_15px_rgba(236,72,153,0.1)] transition group">
-                    <input type="radio" name="level" value="Level 1: Foundation (Simplified context, step-by-step breakdown, direct hints)" checked class="absolute top-4 right-4 text-pink-500 focus:ring-0 bg-slate-900 border-slate-700">
-                    <span class="font-cyber font-black text-pink-500 tracking-wide text-sm mb-1 uppercase">Level 01</span>
-                    <span class="font-bold text-slate-200 text-sm mb-1">Foundation</span>
-                    <span class="text-[11px] text-slate-400 leading-normal">Guided steps, breakdown & basic micro-hints.</span>
-                </label>
-
-                <!-- Level 2 -->
-                <label class="relative flex flex-col p-4 bg-slate-950/60 border border-slate-800 rounded-2xl cursor-pointer hover:border-purple-500/50 hover:shadow-[0_0_15px_rgba(168,85,247,0.1)] transition group">
-                    <input type="radio" name="level" value="Level 2: Standard (Standard curriculum grade-level problem solving)" class="absolute top-4 right-4 text-purple-500 focus:ring-0 bg-slate-900 border-slate-700">
-                    <span class="font-cyber font-black text-purple-400 tracking-wide text-sm mb-1 uppercase">Level 02</span>
-                    <span class="font-bold text-slate-200 text-sm mb-1">Standard</span>
-                    <span class="text-[11px] text-slate-400 leading-normal">Standard curriculum grade-level fluency equations.</span>
-                </label>
-
-                <!-- Level 3 -->
-                <label class="relative flex flex-col p-4 bg-slate-950/60 border border-slate-800 rounded-2xl cursor-pointer hover:border-cyan-500/50 hover:shadow-[0_0_15px_rgba(6,182,212,0.1)] transition group">
-                    <input type="radio" name="level" value="Level 3: Advanced (Complex extension, real-world application, multi-step logic)" class="absolute top-4 right-4 text-cyan-500 focus:ring-0 bg-slate-900 border-slate-700">
-                    <span class="font-cyber font-black text-cyan-400 tracking-wide text-sm mb-1 uppercase">Level 03</span>
-                    <span class="font-bold text-slate-200 text-sm mb-1">Advanced</span>
-                    <span class="text-[11px] text-slate-400 leading-normal">Complex extensions & real-world matrix logic.</span>
-                </label>
-
-            </div>
-        </div>
-
-        <!-- Керемет Неон Батырма -->
-        <button onclick="generateAI()" class="w-full relative group overflow-hidden rounded-2xl p-[2px] focus:outline-none shadow-[0_0_30px_rgba(168,85,247,0.3)] active:scale-[0.99] transition duration-150">
-            <span class="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-600 to-cyan-500 rounded-2xl"></span>
-            <div class="px-8 py-4 bg-slate-950 rounded-[14px] relative group-hover:bg-slate-900/50 transition duration-300 text-center">
-                <span class="font-cyber font-black text-white tracking-widest text-sm uppercase bg-clip-text">
-                    ⚡ Execute Differentiation ⚡
-                </span>
-            </div>
-        </button>
-
-        <!-- Жүктелу индикаторы -->
-        <div id="loading" class="hidden text-center my-8 font-cyber font-bold text-sm tracking-widest text-purple-400 animate-pulse">
-            🛸 MATRIX SCANNING IN PROGRESS... PLEASE WAIT...
-        </div>
-        
-        <!-- Нәтиже шығатын әдемі блок -->
-        <div id="output" class="mt-8 p-6 bg-slate-950/90 border border-slate-800 rounded-2xl text-slate-300 whitespace-pre-line hidden shadow-[inset_0_0_20px_rgba(0,0,0,0.6)] font-sans leading-relaxed text-sm md:text-base border-t-2 border-t-purple-500"></div>
+  <div class="content">
+    <!-- API Key -->
+    <div class="api-section">
+      <label for="apiKey">🔑 Gemini API Key</label>
+      <input type="password" id="apiKey" placeholder="AIza..." />
+      <small>Тегін кілт: <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com/app/apikey</a>. Кілт тек браузерде сақталады.</small>
     </div>
 
-    <script>
-        async function generateAI() {
-            const apiKey = document.getElementById('apiKey').value;
-            const problem = document.getElementById('mathProblem').value;
-            const level = document.querySelector('input[name="level"]:checked').value;
-            const outputDiv = document.getElementById('output');
-            const loadingDiv = document.getElementById('loading');
+    <!-- Topic selection -->
+    <div class="section-label">📚 Тақырып таңдаңыз:</div>
+    <div class="topic-select" id="topicSelect">
+      <button class="topic-btn active" data-topic="linear">Сызықтық теңдеу</button>
+      <button class="topic-btn" data-topic="quadratic">Квадрат теңдеу</button>
+      <button class="topic-btn" data-topic="geometry">Үшбұрыш ауданы</button>
+    </div>
 
-            if (!apiKey) {
-                alert('Please enter your OpenAI API Key!');
-                return;
-            }
+    <!-- Level tabs -->
+    <div class="section-label">🎯 Деңгей:</div>
+    <div class="level-tabs" id="levelTabs">
+      <button class="level-tab active" data-level="foundation">🟢 Foundation</button>
+      <button class="level-tab" data-level="standard">🟡 Standard</button>
+      <button class="level-tab" data-level="advanced">🔴 Advanced</button>
+    </div>
 
-            loadingDiv.classList.remove('hidden');
-            outputDiv.classList.add('hidden');
+    <!-- Task display -->
+    <div class="task-card" id="taskCard">
+      Тапсырманы алу үшін «Тапсырманы жасау» түймесін басыңыз.
+    </div>
 
-            const systemPrompt = "You are an expert Educational AI assistant specializing in differentiated instruction for secondary school mathematics. Your goal is to adapt the core math problem perfectly to match the student's level. Structure the output clearly with: 1) Differentiated Task, 2) Hints & Guidance, 3) Full Explanatory Solution.";
-            const userPrompt = `Core Problem: ${problem}\nTarget Level: ${level}\n\nAdapt this problem and provide hints and solution tailored exactly for this level.`;
+    <div class="actions">
+      <button class="btn btn-primary" id="generateBtn">✨ Тапсырманы жасау</button>
+      <button class="btn btn-secondary" id="hintBtn" disabled>💡 Көмек алу</button>
+      <button class="btn btn-secondary" id="solutionBtn" disabled>📖 Шешімді көру</button>
+    </div>
 
-            try {
-                const response = await fetch('https://openai.com', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: "gpt-4o-mini",
-                        messages: [
-                            { role: "system", content: systemPrompt },
-                            { role: "user", content: userPrompt }
-                        ],
-                        temperature: 0.7
-                    })
+    <div class="hint-box" id="hintBox"></div>
+  </div>
+
+  <footer>
+    AI for Differentiated Learning • Gemini API арқылы жасалған
+  </footer>
+</div>
+
+<script>
+// ============ State ============
+const state = {
+  topic: 'linear',
+  level: 'foundation',
+  currentTask: null,
+};
+
+// ============ Topic prompts ============
+const TOPICS = {
+  linear: 'сызықтық теңдеу (linear equation), мысалы 2x + 5 = 13',
+  quadratic: 'квадрат теңдеу (quadratic equation), мысалы x² - 5x + 6 = 0',
+  geometry: 'үшбұрыштың ауданын табу (triangle area)',
+};
+
+// ============ System prompt for differentiation ============
+function buildSystemPrompt(level) {
+  const base = `Сен — математика мұғалімісің. Қазақ тілінде жауап бер. 
+Тапсырманы нақты, түсінікті, мектеп бағдарламасына сай құрастыр.
+Математикалық дәлдікке мұқият бол. Жауапты тек қажетті форматта бер.`;
+
+  const levelInstructions = {
+    foundation: `
+ДЕҢГЕЙ: FOUNDATION (негізгі).
+- Қарапайым сандар қолдан (1-20 аралығы).
+- Күнделікті өмірден қарапайым контекст қос (алма, кітап, т.б.).
+- Тапсырманы 3-4 қадамға бөліп, әр қадамды түсіндір.
+- Тікелей нұсқаулар мен формулаларды көрсет.
+- Шешім қарапайым, қатесіз болсын.`,
+    standard: `
+ДЕҢГЕЙ: STANDARD (стандартты).
+- Мектеп бағдарламасына сай орташа қиындықтағы сандар.
+- Стандартты есеп түрінде бер, контекст минималды.
+- 2-3 негізгі қадам көрсет.
+- Толық шешім беріңіз.`,
+    advanced: `
+ДЕҢГЕЙ: ADVANCED (кеңейтілген).
+- Күрделі сандар, көпқадамды логика.
+- Нақты өмірлік қолданыс (физика, экономика, геометрия).
+- Бірнеше қадамды талап ететін есеп.
+- Толық шешім + балама әдіс немесе жалпылау көрсет.`,
+  };
+
+  return base + levelInstructions[level];
+}
+
+// ============ Build user prompt ============
+function buildUserPrompt(topicKey, level) {
+  const topicDesc = TOPICS[topicKey];
+
+  if (level === 'foundation') {
+    return `"${topicDesc}" тақырыбы бойынша FOUNDATION деңгейіндегі тапсырма жаса.
+Формат:
+1. Есеп мәтіні (қарапайым, күнделікті контекстпен)
+2. Қадамдық нұсқаулар (3-4 қадам, әрқайсысы түсінікті)
+3. Жауап
+Тек осы форматта жаз.`;
+  }
+  if (level === 'standard') {
+    return `"${topicDesc}" тақырыбы бойынша STANDARD деңгейіндегі тапсырма жаса.
+Формат:
+1. Есеп мәтіні (мектеп бағдарламасы деңгейінде)
+2. Шешу қадамдары (2-3 қадам)
+3. Жауап
+Тек осы форматта жаз.`;
+  }
+  return `"${topicDesc}" тақырыбы бойынша ADVANCED деңгейіндегі тапсырма жаса.
+Формат:
+1. Есеп мәтіні (нақты өмірлік қолданыспен, көпқадамды)
+2. Толық шешім (барлық қадамдар)
+3. Жауап
+4. Қосымша: балама әдіс немесе жалпылау
+Тек осы форматта жаз.`;
+}
+
+// ============ Gemini API call ============
+async function callGemini(systemPrompt, userPrompt, apiKey) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const body = {
+    system_instruction: { parts: [{ text: systemPrompt }] },
+    contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
+    generationConfig: { temperature: 0.7, maxOutputTokens: 1500 },
+  };
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error('API қатесі: ' + res.status + ' — ' + err.slice(0, 200));
+  }
+  const data = await res.json();
+  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) throw new Error('AI жауап бермеді. Қайталап көріңіз.');
+  return text.trim();
+}
+
+// ============ UI elements ============
+const els = {
+  topicBtns: document.querySelectorAll('.topic-btn'),
+  levelTabs: document.querySelectorAll('.level-tab'),
+  taskCard: document.getElementById('taskCard'),
+  generateBtn: document.getElementById('generateBtn'),
+  hintBtn: document.getElementById('hintBtn'),
+  solutionBtn: document.getElementById('solutionBtn'),
+  hintBox: document.getElementById('hintBox'),
+  apiKey: document.getElementById('apiKey'),
+};
+
+// ============ Event handlers ============
+els.topicBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    els.topicBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.topic = btn.dataset.topic;
+    resetTask();
+  });
+});
+
+els.levelTabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    els.levelTabs.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    state.level = tab.dataset.level;
+    // Автоматты түрде жаңа деңгейде тапсырма жасау
+    if (els.apiKey.value.trim()) generateTask();
+  });
+});
+
+els.generateBtn.addEventListener('click', generateTask);
+els.hintBtn.addEventListener('click', () => showHint('hint'));
+els.solutionBtn.addEventListener('click', () => showHint('solution'));
+
+// ============ Reset ============
+function resetTask() {
+  state.currentTask = null;
+  els.taskCard.textContent = 'Тапсырманы алу үшін «Тапсырманы жасау» түймесін басыңыз.';
+  els.hintBox.classList.remove('show');
+  els.hintBtn.disabled = true;
+  els.solutionBtn.disabled = true;
+}
+
+// ============ Generate task ============
+async function generateTask() {
+  const apiKey = els.apiKey.value.trim();
+  if (!apiKey) {
+    alert('Алдымен Gemini API кілтін енгізіңіз 🔑');
+    return;
+  }
+
+  setLoading(true);
+  els.hintBox.classList.remove('show');
+  els.hintBtn.disabled = true;
+  els.solutionBtn.disabled = true;
+
+  try {
+    const systemPrompt = buildSystemPrompt(state.level);
+    const userPrompt = buildUserPrompt(state.topic, state.level);
+    const text = await callGemini(systemPrompt, userPrompt, apiKey);
+
+    state.currentTask = { systemPrompt, userPrompt, text };
+    els.taskCard.textContent = text;
+    els.hintBtn.disabled = false;
+    els.solutionBtn.disabled = false;
+  } catch (e) {
+    els.taskCard.textContent = '❌ Қате: ' + e.message;
+  } finally {
+    setLoading(false);
+  }
+}
+
+function setLoading(isLoading) {
+  if (isLoading) {
+    els.taskCard.innerHTML = '<div class="loading"><div class="spinner"></div>AI тапсырма жасап жатыр...</div>';
+    els.generateBtn.disabled = true;
+  } else {
+    els.generateBtn.disabled = false;
+  }
+}
+
+// ============ Hint / Solution ============
+async function showHint(type) {
+  const apiKey = els.apiKey.value.trim();
+  if (!apiKey || !state.currentTask) return;
+
+  els.hintBox.classList.add('show');
+  els.hintBox.innerHTML = '<div class="loading"><div class="spinner"></div>Дайындалып жатыр...</div>';
+
+  const levelHints = {
+    foundation: type === 'hint'
+      ? 'Осы тапсырмаға өте қарапайым, тікелей көмек бер. 1-2 сөйлеммен не істеу керегін айт.'
+      : 'Осы тапсырманың толық шешімін қарапайым тілде, қадам-қадаммен түсіндір.',
+    standard: type === 'hint'
+      ? 'Осы тапсырмаға бағыттаушы көмек бер. Бірінші қадамды ғана айт, жауапты айтпа.'
+      : 'Осы тапсырманың толық шешімін стандартты деңгейде түсіндір.',
+    advanced: type === 'hint'
+      ? 'Осы тапсырмаға стратегиялық кеңес бер. Негізгі идеяны айт, бірақ толық шешпе.'
+      : 'Осы тапсырманың толық шешімін тереңдетіп, балама әдіспен де түсіндір.',
+  };
+
+  const prompt = `${levelHints[state.level]}
+
+Тапсырма:
+${state.currentTask.text}`;
+
+  try {
+    const result = await callGemini('Сен математика мұғалімісің. Қазақ тілінде жауап бер.', prompt, apiKey);
+    const title = type === 'hint' ? '💡 Көмек' : '📖 Шешім';
+    els.hintBox.innerHTML = `<h4>${title}</h4>${escapeHtml(result)}`;
+  } catch (e) {
+    els.hintBox.innerHTML = '<h4>❌ Қате</h4>' + escapeHtml(e.message);
+  }
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+</script>
+</body>
+</html>
